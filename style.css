@@ -38,19 +38,20 @@ body{
     flex-direction: column;
     gap: 5px;
     align-items: end;
+    padding: 16px;
 }
 div h1{
     color: white;
-    font-size: 1.5rem;
+    font-size: 1.5em;
 }
 div p{
     color: orange;
-    font-size: 1.5rem;
-    font-weight: 100;
+    font-size: 1.5em;
+    font-weight: 700;
 }
 .name{
     background: blue;
-    font-size: 2.5rem;
+    font-size: 2em;
     
 }
 .links a{
