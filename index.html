@@ -13,6 +13,8 @@
             --dark-bg: #0a0a0a;
             --terminal-box: rgba(16, 16, 16, 0.95);
             --border-color: #003311;
+            --cyber-cyan: #00d4ff;
+            --cyber-magenta: #ff00ff;
         }
 
         * {
@@ -31,9 +33,10 @@
             justify-content: center;
             align-items: center;
             padding: 10px;
+            perspective: 1000px;
         }
 
-        /* Efeito Matrix de Fundo */
+        /* Efeito Matrix de Fundo com animação */
         canvas {
             position: absolute;
             top: 0;
@@ -42,6 +45,37 @@
             height: 100%;
             z-index: 1;
             opacity: 0.12;
+            animation: canvasPulse 6s ease-in-out infinite;
+        }
+
+        @keyframes canvasPulse {
+            0%, 100% { opacity: 0.12; }
+            50% { opacity: 0.18; }
+        }
+
+        /* Efeito de Scanlines */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 0, 0, 0.15),
+                rgba(0, 0, 0, 0.15) 1px,
+                transparent 1px,
+                transparent 2px
+            );
+            pointer-events: none;
+            z-index: 999;
+            animation: scanlines 8s linear infinite;
+        }
+
+        @keyframes scanlines {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(10px); }
         }
 
         /* Container Principal do Terminal */
@@ -50,18 +84,39 @@
             z-index: 2;
             width: 100%;
             max-width: 800px;
-            max-height: 90vh; /* Não deixa o terminal estourar a altura da tela */
+            max-height: 90vh;
             background: var(--terminal-box);
-            border: 1px solid var(--neon-green);
+            border: 2px solid var(--neon-green);
             border-radius: 6px;
-            box-shadow: 0 0 20px rgba(0, 255, 102, 0.2);
+            box-shadow: 0 0 20px rgba(0, 255, 102, 0.2),
+                        0 0 40px rgba(0, 255, 102, 0.1),
+                        inset 0 0 20px rgba(0, 255, 102, 0.05);
             display: flex;
             flex-direction: column;
+            animation: terminalEntrance 0.8s ease-out;
+            transition: all 0.3s ease;
+        }
+
+        @keyframes terminalEntrance {
+            from {
+                opacity: 0;
+                transform: scale(0.95) translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .terminal:hover {
+            box-shadow: 0 0 30px rgba(0, 255, 102, 0.3),
+                        0 0 50px rgba(0, 255, 102, 0.15),
+                        inset 0 0 20px rgba(0, 255, 102, 0.08);
         }
 
         /* Barra Superior Fixa */
         .terminal-header {
-            background: #141414;
+            background: linear-gradient(90deg, #141414, #1a1a1a, #141414);
             padding: 10px;
             display: flex;
             justify-content: space-between;
@@ -69,11 +124,41 @@
             border-bottom: 1px solid var(--border-color);
             border-top-left-radius: 5px;
             border-top-right-radius: 5px;
-            flex-shrink: 0; /* Impede a barra de encolher */
+            flex-shrink: 0;
+            animation: slideDown 0.6s ease-out;
         }
 
-        .buttons { display: flex; gap: 8px; }
-        .btn { width: 12px; height: 12px; border-radius: 50%; }
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .buttons {
+            display: flex;
+            gap: 8px;
+            animation: fadeIn 0.8s ease-out 0.2s both;
+        }
+
+        .btn {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+        }
+
+        .btn:hover {
+            transform: scale(1.3);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
+        }
+
         .btn-r { background: #ff5f56; }
         .btn-y { background: #ffbd2e; }
         .btn-g { background: #27c93f; }
@@ -85,39 +170,92 @@
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+            animation: fadeIn 0.8s ease-out 0.3s both;
+            text-shadow: 0 0 5px rgba(0, 255, 102, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .title:hover {
+            color: var(--neon-green);
+            text-shadow: 0 0 10px rgba(0, 255, 102, 0.6);
         }
 
         /* Corpo do Terminal com SCROLL Inteligente */
         .terminal-body {
             padding: 15px;
-            overflow-y: auto; /* Ativa o scroll vertical se necessário */
-            flex-grow: 1; /* Ocupa o espaço restante */
+            overflow-y: auto;
+            flex-grow: 1;
             display: flex;
             flex-direction: column;
             gap: 12px;
+            animation: fadeIn 0.8s ease-out 0.4s both;
         }
 
-        /* Customização da Barra de Rolagem (Scrollbar) Hacker */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        /* Customização da Barra de Rolagem */
         .terminal-body::-webkit-scrollbar {
-            width: 6px;
+            width: 8px;
         }
         .terminal-body::-webkit-scrollbar-track {
             background: #0d0d0d;
         }
         .terminal-body::-webkit-scrollbar-thumb {
             background: var(--border-color);
-            border-radius: 3px;
+            border-radius: 4px;
+            transition: all 0.3s ease;
         }
         .terminal-body::-webkit-scrollbar-thumb:hover {
             background: var(--neon-green);
+            box-shadow: 0 0 10px rgba(0, 255, 102, 0.5);
         }
 
+        /* Efeito Glitch para textos especiais */
         .glitch-text {
             font-size: 20px;
             font-weight: bold;
             text-transform: uppercase;
             letter-spacing: 2px;
             text-shadow: 0 0 8px var(--neon-green);
+            position: relative;
+            animation: glitchAnimation 0.3s ease-out;
+        }
+
+        @keyframes glitchAnimation {
+            0% {
+                opacity: 0;
+                transform: translateX(-10px) skewX(-10deg);
+            }
+            50% {
+                text-shadow: -2px 0 var(--cyber-magenta), 2px 0 var(--cyber-cyan), 0 0 8px var(--neon-green);
+            }
+            100% {
+                opacity: 1;
+                transform: translateX(0) skewX(0);
+            }
+        }
+
+        .glitch-text::before {
+            content: attr(data-text);
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            animation: glitchTextBefore 2.5s infinite;
+        }
+
+        @keyframes glitchTextBefore {
+            0% { opacity: 0; }
+            20% { opacity: 0.8; text-shadow: -2px 0 var(--cyber-magenta); transform: translateX(2px); }
+            40% { opacity: 0; }
+            100% { opacity: 0; }
         }
 
         .line {
@@ -125,6 +263,27 @@
             line-height: 1.5;
             white-space: pre-wrap;
             word-break: break-all;
+            animation: slideInLeft 0.5s ease-out;
+            animation-fill-mode: both;
+        }
+
+        .line:nth-child(1) { animation-delay: 0.1s; }
+        .line:nth-child(2) { animation-delay: 0.2s; }
+        .line:nth-child(3) { animation-delay: 0.3s; }
+        .line:nth-child(4) { animation-delay: 0.4s; }
+        .line:nth-child(5) { animation-delay: 0.5s; }
+        .line:nth-child(6) { animation-delay: 0.6s; }
+        .line:nth-child(7) { animation-delay: 0.7s; }
+
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
         }
 
         .output {
@@ -132,19 +291,47 @@
             opacity: 0.8;
             padding-left: 10px;
             display: inline-block;
+            transition: all 0.3s ease;
+        }
+
+        .output:hover {
+            color: var(--cyber-cyan);
+            text-shadow: 0 0 5px var(--cyber-cyan);
+            transform: translateX(2px);
         }
 
         .profile-output {
             color: #00b3ff;
             text-decoration: none;
             font-weight: bold;
-            transition: all 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative;
+            padding-bottom: 2px;
+            border-bottom: 1px solid transparent;
         }
+
+        .profile-output::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #00b3ff, #00ff66);
+            transition: width 0.3s ease;
+        }
+
         .profile-output:hover {
-            text-decoration: underline;
-            text-shadow: 0 0 5px #00b3ff;
-            opacity: 1;
+            text-decoration: none;
+            text-shadow: 0 0 10px #00b3ff, 0 0 20px rgba(0, 255, 102, 0.5);
+            color: #00ff66;
+            transform: translateY(-2px);
         }
+
+        .profile-output:hover::after {
+            width: 100%;
+        }
+
         .profile-output:focus {
             outline: 2px solid var(--neon-green);
             outline-offset: 2px;
@@ -158,27 +345,43 @@
             background-color: var(--neon-green);
             margin-left: 4px;
             animation: typing-blink 0.7s infinite;
+            box-shadow: 0 0 5px var(--neon-green);
         }
 
         @keyframes typing-blink {
-            0%, 49% { opacity: 1; }
-            50%, 100% { opacity: 0; }
+            0%, 49% { opacity: 1; box-shadow: 0 0 10px var(--neon-green); }
+            50%, 100% { opacity: 0; box-shadow: 0 0 5px var(--neon-green); }
         }
 
         .typing-text {
             overflow: hidden;
             display: inline;
             white-space: nowrap;
+            animation: typewriter 2s steps(20, end) forwards;
+        }
+
+        @keyframes typewriter {
+            from { width: 0; }
+            to { width: 100%; }
+        }
+
+        .prompt {
+            animation: slideInLeft 0.5s ease-out;
         }
 
         .prompt::after {
             content: "█";
             animation: blink 1s infinite;
             margin-left: 5px;
+            text-shadow: 0 0 5px var(--neon-green);
         }
-        @keyframes blink { 0%, 49% { opacity: 1; } 50%, 100% { opacity: 0; } }
 
-        /* Rodapé de Links Fixo ou Acoplado */
+        @keyframes blink {
+            0%, 49% { opacity: 1; }
+            50%, 100% { opacity: 0; }
+        }
+
+        /* Rodapé de Links */
         .links-container {
             margin-top: auto;
             display: flex;
@@ -186,35 +389,74 @@
             flex-wrap: wrap;
             border-top: 1px dashed var(--border-color);
             padding-top: 12px;
-            flex-shrink: 0; /* Impede os botões de sumirem */
+            flex-shrink: 0;
             justify-content: center;
+            animation: fadeIn 0.8s ease-out 0.8s both;
         }
 
         .hacker-link {
             color: var(--neon-green);
             text-decoration: none;
-            border: 1px solid var(--neon-green);
-            padding: 6px 10px;
+            border: 2px solid var(--neon-green);
+            padding: 8px 14px;
             font-size: 10px;
             text-transform: uppercase;
-            transition: all 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
             cursor: pointer;
             text-align: center;
             white-space: nowrap;
+            position: relative;
+            overflow: hidden;
+            background: transparent;
+            font-weight: bold;
         }
-        .hacker-link:hover {
+
+        .hacker-link::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
             background: var(--neon-green);
+            z-index: -1;
+            transition: left 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .hacker-link:hover {
             color: #000;
-            box-shadow: 0 0 15px var(--neon-green);
+            box-shadow: 0 0 20px var(--neon-green),
+                        0 0 40px rgba(0, 255, 102, 0.3),
+                        inset 0 0 20px rgba(0, 255, 102, 0.2);
+            transform: scale(1.05) translateY(-2px);
+            text-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .hacker-link:hover::before {
+            left: 0;
+        }
+
+        .hacker-link:active {
+            transform: scale(0.95);
         }
 
         /* Ajustes de Responsividade para Telas Extra Pequenas (Celular) */
         @media (max-width: 360px) {
             .terminal {
                 border-radius: 3px;
+                border-width: 1px;
+                max-height: 85vh;
             }
             .terminal-header {
                 padding: 8px;
+                gap: 6px;
+            }
+            .buttons {
+                gap: 5px;
+            }
+            .btn {
+                width: 10px;
+                height: 10px;
             }
             .terminal-body {
                 padding: 10px;
@@ -234,23 +476,28 @@
             }
             .hacker-link {
                 flex-grow: 1;
-                padding: 5px 8px;
+                padding: 6px 8px;
                 font-size: 9px;
+                border: 1px solid var(--neon-green);
             }
             .output {
                 padding-left: 5px;
+                font-size: 11px;
             }
         }
 
         /* Ajustes de Responsividade para Celulares Pequenos (320px - 480px) */
         @media (min-width: 361px) and (max-width: 480px) {
+            .terminal {
+                max-height: 87vh;
+            }
             .terminal-body {
                 padding: 12px;
                 gap: 10px;
             }
             .glitch-text {
                 font-size: 16px;
-                letter-spacing: 1px;
+                letter-spacing: 1.5px;
             }
             .line {
                 font-size: 12px;
@@ -262,7 +509,8 @@
             .hacker-link {
                 flex-grow: 1;
                 font-size: 10px;
-                padding: 6px 10px;
+                padding: 7px 10px;
+                border: 1px solid var(--neon-green);
             }
             .output {
                 padding-left: 8px;
@@ -271,12 +519,16 @@
 
         /* Ajustes de Responsividade para Tablets Pequenos (481px - 768px) */
         @media (min-width: 481px) and (max-width: 768px) {
+            .terminal {
+                max-height: 88vh;
+            }
             .terminal-body {
-                padding: 20px;
+                padding: 18px;
                 gap: 12px;
             }
             .glitch-text {
                 font-size: 20px;
+                letter-spacing: 2px;
             }
             .line {
                 font-size: 13px;
@@ -287,7 +539,7 @@
             .hacker-link {
                 flex-grow: 0;
                 font-size: 11px;
-                padding: 7px 14px;
+                padding: 8px 14px;
             }
             .output {
                 padding-left: 12px;
@@ -296,12 +548,16 @@
 
         /* Ajustes de Responsividade para Tablets Grandes e Desktops (769px+) */
         @media (min-width: 769px) {
+            .terminal {
+                max-height: 90vh;
+            }
             .terminal-body {
                 padding: 25px;
                 gap: 15px;
             }
             .glitch-text {
                 font-size: 24px;
+                letter-spacing: 2.5px;
             }
             .line {
                 font-size: 14px;
@@ -312,10 +568,39 @@
             .hacker-link {
                 flex-grow: 0;
                 font-size: 12px;
-                padding: 8px 16px;
+                padding: 10px 18px;
             }
             .output {
                 padding-left: 15px;
+            }
+        }
+
+        /* Animações para telas menores */
+        @media (max-width: 480px) {
+            @keyframes slideInLeft {
+                from {
+                    opacity: 0;
+                    transform: translateX(-15px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateX(0);
+                }
+            }
+
+            .hacker-link:hover {
+                transform: scale(1.03) translateY(-1px);
+            }
+        }
+
+        /* Animações para telas maiores */
+        @media (min-width: 769px) {
+            .hacker-link:hover {
+                transform: scale(1.08) translateY(-3px);
+            }
+
+            .terminal:hover {
+                transform: perspective(1000px) rotateX(0deg);
             }
         }
     </style>
@@ -395,7 +680,7 @@
                 setTimeout(() => {
                     if (index < text.length) {
                         clearInterval(typingInterval);
-                        element.textContent = text; // Mostrar texto completo
+                        element.textContent = text;
                         resolve();
                     }
                 }, speed * text.length * 2);
@@ -415,28 +700,99 @@
             };
         }
 
+        // Animação de glitch no texto
+        function addGlitchEffect(element) {
+            if (element.textContent) {
+                element.setAttribute('data-text', element.textContent);
+            }
+        }
+
         // Iniciar animação de digitação quando a página carrega
         document.addEventListener('DOMContentLoaded', async () => {
             try {
+                // Adicionar efeito glitch
+                const glitchElements = document.querySelectorAll('.glitch-text');
+                glitchElements.forEach(el => addGlitchEffect(el));
+
+                // Animar linhas com stagger
+                const lines = document.querySelectorAll('.line');
+                lines.forEach((line, index) => {
+                    line.style.animationDelay = `${0.1 + index * 0.1}s`;
+                });
+
+                // Animar links container
+                const linksContainer = document.querySelector('.links-container');
+                if (linksContainer) {
+                    linksContainer.style.animationDelay = '0.8s';
+                }
+
+                // Adicionar efeitos aos botões
+                const buttons = document.querySelectorAll('.btn');
+                buttons.forEach(btn => {
+                    btn.addEventListener('click', function(e) {
+                        const ripple = document.createElement('span');
+                        ripple.style.position = 'absolute';
+                        ripple.style.width = '20px';
+                        ripple.style.height = '20px';
+                        ripple.style.backgroundColor = 'rgba(255, 255, 255, 0.5)';
+                        ripple.style.borderRadius = '50%';
+                        ripple.style.pointerEvents = 'none';
+                        ripple.style.animation = 'rippleEffect 0.6s ease-out';
+                        this.appendChild(ripple);
+                        
+                        setTimeout(() => ripple.remove(), 600);
+                    });
+                });
+
+                // Fazer a digitação
                 const typingText = document.getElementById('typing-text');
                 const cursor = document.querySelector('.typing-cursor');
-                
-                // Texto a ser digitado
                 const textToType = 'escaneando_portas...';
                 
-                // Fazer a digitação
                 await typeText(typingText, textToType, 80);
                 
                 // Remover o cursor após terminar
                 if (cursor) {
-                    cursor.style.display = 'none';
+                    cursor.style.animation = 'fadeOutCursor 0.5s ease-out forwards';
                 }
             } catch (error) {
                 console.error('Erro na animação de digitação:', error);
             }
         });
 
-        // Canvas Matrix Background
+        // Adicionar efeito de hover nos links
+        document.querySelectorAll('.hacker-link').forEach(link => {
+            link.addEventListener('mouseenter', function() {
+                this.style.position = 'relative';
+            });
+
+            link.addEventListener('click', function(e) {
+                // Criar efeito de pulse
+                const rect = this.getBoundingClientRect();
+                const pulse = document.createElement('div');
+                pulse.style.position = 'fixed';
+                pulse.style.width = '20px';
+                pulse.style.height = '20px';
+                pulse.style.left = e.clientX + 'px';
+                pulse.style.top = e.clientY + 'px';
+                pulse.style.borderRadius = '50%';
+                pulse.style.border = '2px solid var(--neon-green)';
+                pulse.style.pointerEvents = 'none';
+                pulse.style.animation = 'pulsEffect 0.6s ease-out forwards';
+                document.body.appendChild(pulse);
+                
+                setTimeout(() => pulse.remove(), 600);
+            });
+        });
+
+        // Animar elementos do perfil
+        document.querySelectorAll('.profile-output').forEach(link => {
+            link.addEventListener('mouseenter', function() {
+                this.style.position = 'relative';
+            });
+        });
+
+        // Canvas Matrix Background com melhorias
         const canvas = document.getElementById('matrix');
         const ctx = canvas.getContext('2d');
 
@@ -498,6 +854,56 @@
             clearInterval(interval);
             window.removeEventListener('resize', handleResize);
         });
+
+        // Adicionar estilos CSS dinâmicos para efeitos adicionais
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes rippleEffect {
+                0% {
+                    transform: scale(1);
+                    opacity: 1;
+                }
+                100% {
+                    transform: scale(3);
+                    opacity: 0;
+                }
+            }
+
+            @keyframes pulsEffect {
+                0% {
+                    transform: scale(1);
+                    opacity: 1;
+                }
+                100% {
+                    transform: scale(3);
+                    opacity: 0;
+                }
+            }
+
+            @keyframes fadeOutCursor {
+                0% {
+                    opacity: 1;
+                }
+                100% {
+                    opacity: 0;
+                }
+            }
+
+            /* Efeito de glow ao focar na página */
+            :focus-visible {
+                outline-color: var(--neon-green);
+            }
+
+            /* Melhorias de acessibilidade */
+            @media (prefers-reduced-motion: reduce) {
+                * {
+                    animation-duration: 0.01ms !important;
+                    animation-iteration-count: 1 !important;
+                    transition-duration: 0.01ms !important;
+                }
+            }
+        `;
+        document.head.appendChild(style);
     </script>
 </body>
 </html>
