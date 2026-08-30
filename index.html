@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <title>DANIL0 T0MASS0NI // Terminal</title>
+    <style>
+        :root {
+            --neon-green: #00ff66;
+            --dark-bg: #0a0a0a;
+            --terminal-box: rgba(16, 16, 16, 0.95);
+            --border-color: #003311;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Share Tech Mono', Courier, monospace;
+        }
+
+        body {
+            background-color: var(--dark-bg);
+            color: var(--neon-green);
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 10px;
+        }
+
+        /* Efeito Matrix de Fundo */
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            opacity: 0.12;
+        }
+
+        /* Container Principal do Terminal */
+        .terminal {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            max-width: 800px;
+            max-height: 90vh; /* Não deixa o terminal estourar a altura da tela */
+            background: var(--terminal-box);
+            border: 1px solid var(--neon-green);
+            border-radius: 6px;
+            box-shadow: 0 0 20px rgba(0, 255, 102, 0.2);
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Barra Superior Fixa */
+        .terminal-header {
+            background: #141414;
+            padding: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            border-top-left-radius: 5px;
+            border-top-right-radius: 5px;
+            flex-shrink: 0; /* Impede a barra de encolher */
+        }
+
+        .buttons { display: flex; gap: 8px; }
+        .btn { width: 12px; height: 12px; border-radius: 50%; }
+        .btn-r { background: #ff5f56; }
+        .btn-y { background: #ffbd2e; }
+        .btn-g { background: #27c93f; }
+
+        .title {
+            font-size: 11px;
+            color: #888;
+            letter-spacing: 1px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Corpo do Terminal com SCROLL Inteligente */
+        .terminal-body {
+            padding: 15px;
+            overflow-y: auto; /* Ativa o scroll vertical se necessário */
+            flex-grow: 1; /* Ocupa o espaço restante */
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        /* Customização da Barra de Rolagem (Scrollbar) Hacker */
+        .terminal-body::-webkit-scrollbar {
+            width: 6px;
+        }
+        .terminal-body::-webkit-scrollbar-track {
+            background: #0d0d0d;
+        }
+        .terminal-body::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 3px;
+        }
+        .terminal-body::-webkit-scrollbar-thumb:hover {
+            background: var(--neon-green);
+        }
+
+        .glitch-text {
+            font-size: 20px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 0 0 8px var(--neon-green);
+        }
+
+        .line {
+            font-size: 13px;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        .output {
+            color: #ffffff;
+            opacity: 0.8;
+            padding-left: 10px;
+            display: inline-block;
+        }
+
+        .profile-output {
+            color: #00b3ff;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        .profile-output:hover {
+            text-decoration: underline;
+            text-shadow: 0 0 5px #00b3ff;
+            opacity: 1;
+        }
+        .profile-output:focus {
+            outline: 2px solid var(--neon-green);
+            outline-offset: 2px;
+        }
+
+        /* Animação de Digitação */
+        .typing-cursor {
+            display: inline-block;
+            width: 2px;
+            height: 1em;
+            background-color: var(--neon-green);
+            margin-left: 4px;
+            animation: typing-blink 0.7s infinite;
+        }
+
+        @keyframes typing-blink {
+            0%, 49% { opacity: 1; }
+            50%, 100% { opacity: 0; }
+        }
+
+        .typing-text {
+            overflow: hidden;
+            display: inline;
+            white-space: nowrap;
+        }
+
+        .prompt::after {
+            content: "█";
+            animation: blink 1s infinite;
+            margin-left: 5px;
+        }
+        @keyframes blink { 0%, 49% { opacity: 1; } 50%, 100% { opacity: 0; } }
+
+        /* Rodapé de Links Fixo ou Acoplado */
+        .links-container {
+            margin-top: auto;
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            border-top: 1px dashed var(--border-color);
+            padding-top: 12px;
+            flex-shrink: 0; /* Impede os botões de sumirem */
+            justify-content: center;
+        }
+
+        .hacker-link {
+            color: var(--neon-green);
+            text-decoration: none;
+            border: 1px solid var(--neon-green);
+            padding: 6px 10px;
+            font-size: 10px;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            text-align: center;
+            white-space: nowrap;
+        }
+        .hacker-link:hover {
+            background: var(--neon-green);
+            color: #000;
+            box-shadow: 0 0 15px var(--neon-green);
+        }
+
+        /* Ajustes de Responsividade para Telas Extra Pequenas (Celular) */
+        @media (max-width: 360px) {
+            .terminal {
+                border-radius: 3px;
+            }
+            .terminal-header {
+                padding: 8px;
+            }
+            .terminal-body {
+                padding: 10px;
+                gap: 8px;
+            }
+            .glitch-text {
+                font-size: 14px;
+                letter-spacing: 1px;
+            }
+            .line {
+                font-size: 11px;
+                line-height: 1.4;
+            }
+            .title {
+                font-size: 9px;
+                letter-spacing: 0.5px;
+            }
+            .hacker-link {
+                flex-grow: 1;
+                padding: 5px 8px;
+                font-size: 9px;
+            }
+            .output {
+                padding-left: 5px;
+            }
+        }
+
+        /* Ajustes de Responsividade para Celulares Pequenos (320px - 480px) */
+        @media (min-width: 361px) and (max-width: 480px) {
+            .terminal-body {
+                padding: 12px;
+                gap: 10px;
+            }
+            .glitch-text {
+                font-size: 16px;
+                letter-spacing: 1px;
+            }
+            .line {
+                font-size: 12px;
+                line-height: 1.5;
+            }
+            .title {
+                font-size: 10px;
+            }
+            .hacker-link {
+                flex-grow: 1;
+                font-size: 10px;
+                padding: 6px 10px;
+            }
+            .output {
+                padding-left: 8px;
+            }
+        }
+
+        /* Ajustes de Responsividade para Tablets Pequenos (481px - 768px) */
+        @media (min-width: 481px) and (max-width: 768px) {
+            .terminal-body {
+                padding: 20px;
+                gap: 12px;
+            }
+            .glitch-text {
+                font-size: 20px;
+            }
+            .line {
+                font-size: 13px;
+            }
+            .title {
+                font-size: 11px;
+            }
+            .hacker-link {
+                flex-grow: 0;
+                font-size: 11px;
+                padding: 7px 14px;
+            }
+            .output {
+                padding-left: 12px;
+            }
+        }
+
+        /* Ajustes de Responsividade para Tablets Grandes e Desktops (769px+) */
+        @media (min-width: 769px) {
+            .terminal-body {
+                padding: 25px;
+                gap: 15px;
+            }
+            .glitch-text {
+                font-size: 24px;
+            }
+            .line {
+                font-size: 14px;
+            }
+            .title {
+                font-size: 12px;
+            }
+            .hacker-link {
+                flex-grow: 0;
+                font-size: 12px;
+                padding: 8px 16px;
+            }
+            .output {
+                padding-left: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="matrix"></canvas>
+
+    <div class="terminal">
+        <div class="terminal-header">
+            <div class="buttons">
+                <div class="btn btn-r"></div>
+                <div class="btn btn-y"></div>
+                <div class="btn btn-g"></div>
+            </div>
+            <div class="title">SECURE_SHELL_v4.02</div>
+            <div></div>
+        </div>
+        
+        <div class="terminal-body">
+            <div class="glitch-text">> ACESSO CONCEDIDO</div>
+            
+            <div class="line">[+] SISTEMA: Nginx / Reverse Proxy Operacional</div>
+            <div class="line">[+] STATUS: <span style="color: #fff; background: #004411; padding: 2px 5px;">ONLINE</span></div>
+            
+            <div class="line">
+                [>] CONFIGURAÇÃO_DO_OPERADOR:<br>
+                <span class="output">- NOME:  <b style="color: #fff;">DANILO TOMASSONI</b></span><br>
+                <span class="output">- GIT:   <a href="https://github.com/danilotomassoni" target="_blank" class="profile-output">://github.com...</a></span><br>
+                <span class="output">- LINK:  <a href="https://linkedin.com/in/danilotomassoni" target="_blank" class="profile-output">://linkedin.com...</a></span>
+            </div>
+
+            <div class="line">
+                [>] INFRAESTRUTURA DE REDE:<br>
+                <span class="output">- Host: localhost:80</span><br>
+                <span class="output">- Host: [::]:80</span><br>
+            </div>
+
+            <div class="line prompt" id="typing-line">[dust@master:~]# <span id="typing-text"></span><span class="typing-cursor"></span></div>
+
+            <div class="links-container">
+                <a href="/" class="hacker-link" title="Acessar a API">Acessar API</a>
+                <button class="hacker-link" onclick="alert('Conexão estável com o cluster local.')" type="button" title="Verificar status dos nós">Verificar Nós</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Função de Animação de Digitação com Tratamento de Erros
+        function typeText(element, text, speed = 80) {
+            return new Promise((resolve, reject) => {
+                if (!element) {
+                    reject(new Error('Elemento não encontrado'));
+                    return;
+                }
+                
+                let index = 0;
+                let content = '';
+                
+                const typingInterval = setInterval(() => {
+                    try {
+                        if (index < text.length) {
+                            content += text.charAt(index);
+                            element.textContent = content;
+                            index++;
+                        } else {
+                            clearInterval(typingInterval);
+                            resolve();
+                        }
+                    } catch (error) {
+                        clearInterval(typingInterval);
+                        reject(error);
+                    }
+                }, speed);
+                
+                // Cleanup timeout
+                setTimeout(() => {
+                    if (index < text.length) {
+                        clearInterval(typingInterval);
+                        element.textContent = text; // Mostrar texto completo
+                        resolve();
+                    }
+                }, speed * text.length * 2);
+            });
+        }
+
+        // Debounce para resize events
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        // Iniciar animação de digitação quando a página carrega
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const typingText = document.getElementById('typing-text');
+                const cursor = document.querySelector('.typing-cursor');
+                
+                // Texto a ser digitado
+                const textToType = 'escaneando_portas...';
+                
+                // Fazer a digitação
+                await typeText(typingText, textToType, 80);
+                
+                // Remover o cursor após terminar
+                if (cursor) {
+                    cursor.style.display = 'none';
+                }
+            } catch (error) {
+                console.error('Erro na animação de digitação:', error);
+            }
+        });
+
+        // Canvas Matrix Background
+        const canvas = document.getElementById('matrix');
+        const ctx = canvas.getContext('2d');
+
+        let fontSize = 14;
+        let columns;
+        let rainDrops = [];
+        const katakana = 'ｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾄﾅﾆﾇﾈﾉﾊﾋﾌﾍﾎﾏﾐﾑﾒﾓﾔﾕﾖﾗﾘﾙﾚﾛﾜﾝ1234567890ABCDEF';
+        const alphabet = katakana.split('');
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            fontSize = window.innerWidth < 480 ? 10 : 14;
+            columns = canvas.width / fontSize;
+            
+            rainDrops = [];
+            for (let x = 0; x < columns; x++) {
+                rainDrops[x] = Math.random() * -100;
+            }
+        }
+
+        resizeCanvas();
+
+        const draw = () => {
+            ctx.fillStyle = 'rgba(10, 10, 10, 0.08)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.fillStyle = '#00ff66';
+            ctx.font = fontSize + 'px monospace';
+
+            for (let i = 0; i < rainDrops.length; i++) {
+                const text = alphabet[Math.floor(Math.random() * alphabet.length)];
+                ctx.fillText(text, i * fontSize, rainDrops[i] * fontSize);
+
+                if (rainDrops[i] * fontSize > canvas.height && Math.random() > 0.98) {
+                    rainDrops[i] = 0;
+                }
+                rainDrops[i]++;
+            }
+        };
+
+        let interval = setInterval(draw, 33);
+        
+        // Debounce resize para melhor performance
+        const handleResize = debounce(() => {
+            try {
+                clearInterval(interval);
+                resizeCanvas();
+                interval = setInterval(draw, 33);
+            } catch (error) {
+                console.error('Erro ao redimensionar canvas:', error);
+            }
+        }, 200);
+
+        window.addEventListener('resize', handleResize);
+        
+        // Cleanup ao descarregar a página
+        window.addEventListener('beforeunload', () => {
+            clearInterval(interval);
+            window.removeEventListener('resize', handleResize);
+        });
+    </script>
+</body>
+</html>
