@@ -641,6 +641,12 @@
 
             <div class="line prompt" id="typing-line">[dust@master:~]# <span id="typing-text"></span><span class="typing-cursor"></span></div>
 
+            <div id="command-output" style="display: none;">
+                <div class="line"><span class="output">systemd-r    776 systemd-resolve  17u  IPv4   6721      0t0  TCP 127.0.0.53:53 (LISTEN)</span></div>
+                <div class="line"><span class="output">systemd-r    776 systemd-resolve  19u  IPv4   6723      0t0  TCP 127.0.0.54:53 (LISTEN)</span></div>
+                <div class="line"><span class="output">cupsd       2017            root   6u  IPv6  19893      0t0  TCP [::1]:631 (LISTEN)</span></div>
+            </div>
+
             <div class="links-container">
                 <a href="/" class="hacker-link" title="Acessar a API">Acessar API</a>
                 <button class="hacker-link" onclick="alert('Conexão estável com o cluster local.')" type="button" title="Verificar status dos nós">Verificar Nós</button>
@@ -747,14 +753,26 @@
                 // Fazer a digitação
                 const typingText = document.getElementById('typing-text');
                 const cursor = document.querySelector('.typing-cursor');
-                const textToType = 'escaneando_portas...';
-                
+                const textToType = 'sudo lsof -i -P -n | grep LISTEN'                
                 await typeText(typingText, textToType, 80);
                 
                 // Remover o cursor após terminar
                 if (cursor) {
                     cursor.style.animation = 'fadeOutCursor 0.5s ease-out forwards';
                 }
+
+                // Mostrar o output do comando após 500ms
+                setTimeout(() => {
+                    const commandOutput = document.getElementById('command-output');
+                    if (commandOutput) {
+                        commandOutput.style.display = 'block';
+                        // Animar cada linha do output
+                        const outputLines = commandOutput.querySelectorAll('.line');
+                        outputLines.forEach((line, index) => {
+                            line.style.animationDelay = `${0.3 + index * 0.1}s`;
+                        });
+                    }
+                }, 500);
             } catch (error) {
                 console.error('Erro na animação de digitação:', error);
             }
