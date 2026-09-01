@@ -6,7 +6,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
-    <title>DANIL0 T0MASS0NI // Terminal</title>
+    <title>DANIL0 T0MASS0NI</title>
     <style>
         :root {
             --neon-green: #00ff66;
@@ -642,9 +642,9 @@
             <div class="line prompt" id="typing-line">[dust@master:~]# <span id="typing-text"></span><span class="typing-cursor"></span></div>
 
             <div id="command-output" style="display: none;">
-                <div class="line"><span class="output">systemd-r    776 systemd-resolve  17u  IPv4   6721      0t0  TCP 127.0.0.53:53 (LISTEN)</span></div>
-                <div class="line"><span class="output">systemd-r    776 systemd-resolve  19u  IPv4   6723      0t0  TCP 127.0.0.54:53 (LISTEN)</span></div>
-                <div class="line"><span class="output">cupsd       2017            root   6u  IPv6  19893      0t0  TCP [::1]:631 (LISTEN)</span></div>
+                <div class="line"><span class="output">tcp  LISTEN  0   4096    127.0.0.53%lo:53    0.0.0.0:*  </span></div>
+                <div class="line"><span class="output">tcp  LISTEN  0   4096    [::1]:631           [::]:*   </span></div>
+                <div class="line"><span class="output">tcp  LISTEN  0   511     [::]:80             [::]:*  </span></div>
             </div>
 
             <div class="links-container">
@@ -753,7 +753,7 @@
                 // Fazer a digitação
                 const typingText = document.getElementById('typing-text');
                 const cursor = document.querySelector('.typing-cursor');
-                const textToType = 'sudo lsof -i -P -n | grep LISTEN'                
+                const textToType = 'sudo ss -tuln | grep LISTEN'                
                 await typeText(typingText, textToType, 80);
                 
                 // Remover o cursor após terminar
@@ -835,7 +835,7 @@
         resizeCanvas();
 
         const draw = () => {
-            ctx.fillStyle = 'rgba(10, 10, 10, 0.08)';
+            ctx.fillStyle = 'rgba(10, 10, 10, .1)';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
             ctx.fillStyle = '#00ff66';
@@ -845,7 +845,7 @@
                 const text = alphabet[Math.floor(Math.random() * alphabet.length)];
                 ctx.fillText(text, i * fontSize, rainDrops[i] * fontSize);
 
-                if (rainDrops[i] * fontSize > canvas.height && Math.random() > 0.98) {
+                if (rainDrops[i] * fontSize > canvas.height && Math.random() > .975) {
                     rainDrops[i] = 0;
                 }
                 rainDrops[i]++;
