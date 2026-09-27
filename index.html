@@ -187,7 +187,7 @@
             flex-grow: 1;
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 8px;
             animation: fadeIn 0.8s ease-out 0.4s both;
         }
 
@@ -335,50 +335,6 @@
         .profile-output:focus {
             outline: 2px solid var(--neon-green);
             outline-offset: 2px;
-        }
-
-        /* Animação de Digitação */
-        .typing-cursor {
-            display: inline-block;
-            width: 2px;
-            height: 1em;
-            background-color: var(--neon-green);
-            margin-left: 4px;
-            animation: typing-blink 0.7s infinite;
-            box-shadow: 0 0 5px var(--neon-green);
-        }
-
-        @keyframes typing-blink {
-            0%, 49% { opacity: 1; box-shadow: 0 0 10px var(--neon-green); }
-            50%, 100% { opacity: 0; box-shadow: 0 0 5px var(--neon-green); }
-        }
-
-        .typing-text {
-            overflow: hidden;
-            display: inline;
-            white-space: nowrap;
-            animation: typewriter 2s steps(20, end) forwards;
-        }
-
-        @keyframes typewriter {
-            from { width: 0; }
-            to { width: 100%; }
-        }
-
-        .prompt {
-            animation: slideInLeft 0.5s ease-out;
-        }
-
-        .prompt::after {
-            content: "█";
-            animation: blink 1s infinite;
-            margin-left: 5px;
-            text-shadow: 0 0 5px var(--neon-green);
-        }
-
-        @keyframes blink {
-            0%, 49% { opacity: 1; }
-            50%, 100% { opacity: 0; }
         }
 
         /* Rodapé de Links */
@@ -635,21 +591,8 @@
 
             <div class="line">
                 [>] INFRAESTRUTURA DE REDE:<br>
-                <span class="output">- Host: localhost:80</span><br>
+                <span class="output">- Host: 192.168.1.100:80</span><br>
                 <span class="output">- Host: [::]:80</span><br>
-            </div>
-
-            <div class="line prompt" id="typing-line">[dust@master:~]# <span id="typing-text"></span><span class="typing-cursor"></span></div>
-
-            <div id="command-output" style="display: none;">
-                <div class="line"><span class="output">tcp  LISTEN  0   4096    127.0.0.53%lo:53    0.0.0.0:*  </span></div>
-                <div class="line"><span class="output">tcp  LISTEN  0   4096    [::1]:631           [::]:*   </span></div>
-                <div class="line"><span class="output">tcp  LISTEN  0   511     [::]:80             [::]:*  </span></div>
-            </div>
-
-            <div class="links-container">
-                <a href="/" class="hacker-link" title="Acessar a API">Acessar API</a>
-                <button class="hacker-link" onclick="alert('Conexão estável com o cluster local.')" type="button" title="Verificar status dos nós">Verificar Nós</button>
             </div>
         </div>
     </div>
@@ -713,69 +656,31 @@
             }
         }
 
-        // Iniciar animação de digitação quando a página carrega
-        document.addEventListener('DOMContentLoaded', async () => {
-            try {
-                // Adicionar efeito glitch
-                const glitchElements = document.querySelectorAll('.glitch-text');
-                glitchElements.forEach(el => addGlitchEffect(el));
+        document.addEventListener('DOMContentLoaded', () => {
+            const glitchElements = document.querySelectorAll('.glitch-text');
+            glitchElements.forEach(el => addGlitchEffect(el));
 
-                // Animar linhas com stagger
-                const lines = document.querySelectorAll('.line');
-                lines.forEach((line, index) => {
-                    line.style.animationDelay = `${0.1 + index * 0.1}s`;
+            const lines = document.querySelectorAll('.line');
+            lines.forEach((line, index) => {
+                line.style.animationDelay = `${0.1 + index * 0.1}s`;
+            });
+
+            const buttons = document.querySelectorAll('.btn');
+            buttons.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const ripple = document.createElement('span');
+                    ripple.style.position = 'absolute';
+                    ripple.style.width = '20px';
+                    ripple.style.height = '20px';
+                    ripple.style.backgroundColor = 'rgba(255, 255, 255, 0.5)';
+                    ripple.style.borderRadius = '50%';
+                    ripple.style.pointerEvents = 'none';
+                    ripple.style.animation = 'rippleEffect 0.6s ease-out';
+                    this.appendChild(ripple);
+
+                    setTimeout(() => ripple.remove(), 600);
                 });
-
-                // Animar links container
-                const linksContainer = document.querySelector('.links-container');
-                if (linksContainer) {
-                    linksContainer.style.animationDelay = '0.8s';
-                }
-
-                // Adicionar efeitos aos botões
-                const buttons = document.querySelectorAll('.btn');
-                buttons.forEach(btn => {
-                    btn.addEventListener('click', function(e) {
-                        const ripple = document.createElement('span');
-                        ripple.style.position = 'absolute';
-                        ripple.style.width = '20px';
-                        ripple.style.height = '20px';
-                        ripple.style.backgroundColor = 'rgba(255, 255, 255, 0.5)';
-                        ripple.style.borderRadius = '50%';
-                        ripple.style.pointerEvents = 'none';
-                        ripple.style.animation = 'rippleEffect 0.6s ease-out';
-                        this.appendChild(ripple);
-                        
-                        setTimeout(() => ripple.remove(), 600);
-                    });
-                });
-
-                // Fazer a digitação
-                const typingText = document.getElementById('typing-text');
-                const cursor = document.querySelector('.typing-cursor');
-                const textToType = 'sudo ss -tuln | grep LISTEN'                
-                await typeText(typingText, textToType, 80);
-                
-                // Remover o cursor após terminar
-                if (cursor) {
-                    cursor.style.animation = 'fadeOutCursor 0.5s ease-out forwards';
-                }
-
-                // Mostrar o output do comando após 500ms
-                setTimeout(() => {
-                    const commandOutput = document.getElementById('command-output');
-                    if (commandOutput) {
-                        commandOutput.style.display = 'block';
-                        // Animar cada linha do output
-                        const outputLines = commandOutput.querySelectorAll('.line');
-                        outputLines.forEach((line, index) => {
-                            line.style.animationDelay = `${0.3 + index * 0.1}s`;
-                        });
-                    }
-                }, 500);
-            } catch (error) {
-                console.error('Erro na animação de digitação:', error);
-            }
+            });
         });
 
         // Adicionar efeito de hover nos links
@@ -785,8 +690,6 @@
             });
 
             link.addEventListener('click', function(e) {
-                // Criar efeito de pulse
-                const rect = this.getBoundingClientRect();
                 const pulse = document.createElement('div');
                 pulse.style.position = 'fixed';
                 pulse.style.width = '20px';
@@ -798,7 +701,7 @@
                 pulse.style.pointerEvents = 'none';
                 pulse.style.animation = 'pulsEffect 0.6s ease-out forwards';
                 document.body.appendChild(pulse);
-                
+
                 setTimeout(() => pulse.remove(), 600);
             });
         });
